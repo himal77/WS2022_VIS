@@ -1,21 +1,14 @@
 .bar:hover {
-    opacity: 0.66;
+    opacity: 0.68;
     color: darkblue;
-    font-size: 20px;
-}
-
-body {
-	margin: 0px;
-	overflow: hidden;
 }
 
 rect {
 	fill: royalblue;
-
 }
 
 .tick {
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .axis-label {
