@@ -59,10 +59,66 @@ const renderBarSideway = data => {
         .text('Austria most visited place 2018')
 };
 
+const renderUp = data => {
+
+    const margin = { top: 50, right: 40, bottom: 70, left: 350 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const xValue = d => d.Place;
+    const yValue = d => d.Visitors;
+
+    const xScale = d3.scaleBand()
+        .domain(data.map(xValue))
+        .range([0, innerHeight])
+        .padding(0.10);
+
+    const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data, yValue)])
+        .range([0, innerWidth]);
+
+    const g = svg.append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    // const xAxis = d3.axisBottom(xScale)
+    //     .tickFormat(d3.format('.3s'))
+    //     .tickSize(-innerHeight);
+
+    // g.append('g')
+    //     .call(d3.axisLeft(yScale))
+    //     .selectAll('.domain, .tick line')
+    //     .remove();
+
+    // const xAxisG = g.append('g')
+    //     .call(xAxis)
+    //     .attr('transform', `translate(0, ${innerHeight})`);
+
+    // xAxisG.selectAll('.domain')
+    //     .remove();
+
+    // xAxisG.append('text')
+    //     .attr('class', 'axis-label')
+    //     .attr('y', 50)
+    //     .attr('x', innerWidth / 2)
+    //     .text('Number of Tourists')
+    //     .attr('fill', 'black');
+
+
+    g.selectAll('rect').data(data)
+        .enter().append('rect')
+        .attr('x', d => xScale(xValue(d)))
+        .attr('width', d => yScale(yValue(d)))
+        .attr('height', xScale.bandwidth());
+
+    g.append('text')
+        .attr('y', -10)
+        .text('Austria most visited place 2018')
+};
+
 d3.csv('data.csv').then(data => {
     data.forEach(d => {
         d.Visitors = +d.Visitors
     });
-    renderBarSideway(data);
+    renderUp(data);
     console.log(data);
 });
