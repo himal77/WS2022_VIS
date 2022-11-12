@@ -12,14 +12,15 @@ circle {
 }
 
 .axis-label {
-	font-size: 30px;
+	font-size: 5em;
 	fill: #29100d
 }
 
 .line-path{
     fill: none;
-    stroke: maroon;
     stroke-width: 5;
     stroke-linejoin: round;
+    stroke-linecap: round;
+    mix-blend-mode: multiply;
 }
 
