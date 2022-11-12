@@ -1,129 +1,120 @@
-const titleText = 'Temperature in san fransisco';
-
 const svg = d3.select('svg');
 
 const width = +svg.attr('width');
 const height = +svg.attr('height');
-
 const margin = { top: 50, right: 40, bottom: 77, left: 180 };
 const innerWidth = width - margin.left - margin.right;
 const innerHeight = height - margin.top - margin.bottom;
 
+const titleText = 'World fertility rate from 1960 to 2020 per country';
+const xAxisLabel = 'Years';
+const yAxisLabel = 'Fertility Rate (Births per Woman)';
 
-d3.csv('data-canvas.csv').then(data => {
-    make_our_data();
+d3.csv('our_data.csv').then(original_data => {
 
-    data.forEach(d => {
-        d.temperature = +d.temperature;
-        d.timestamp = new Date(d.timestamp);
-    });
+    // parse the data in useful format
+    var data = make_our_data(original_data);
 
     // taking x value and its label
-    const xValue = d => d.timestamp;
-    const xAxisLabel = 'Timestamp';
+    const x_value = d => d.year;
 
     // taking y value and its label
-    const yValue = d => d.temperature;
-    const yAxisLabel = 'Temperature';
-
-    const colorValue = d => d.city;
+    const y_value = d => d.value;
 
     // value range for x axis
-    const xScale = d3.scaleTime()
-        .domain(d3.extent(data, xValue))
+    const x_axis_range = d3.scaleLinear()
+        .domain(d3.extent(data, x_value))
         .range([0, innerWidth])
         .nice();
 
     // value range for y axis
-    const yScale = d3.scaleLinear()
-        .domain(d3.extent(data, yValue))
+    const y_axis_range = d3.scaleLinear()
+        .domain(d3.extent(data, y_value))
         .range([innerHeight, 0])
         .nice();
 
-    const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+    const col_scale = d3.scaleOrdinal(d3.schemeCategory10);
 
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
+    // appending the y-axis text
+    svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 150)
+        .attr('x', -height + 50)
+        .attr('class', 'axis-label')
+        .text(yAxisLabel)
+        .attr('fill', 'black');
+
+    // appending the x-axis text
+    svg.append('text')
+        .attr('class', 'axis-label')
+        .attr('y', height)
+        .attr('x', width / 2)
+        .text(xAxisLabel)
+        .attr('fill', 'black');
 
     // grid line for height
-    const xAxis = d3.axisBottom(xScale)
+    const x_axis_bottom = d3.axisBottom(x_axis_range)
         .tickSize(-innerHeight)
+        .tickFormat(d3.format("d"))
         .tickPadding(15);
 
     // grid line for width
-    const yAxis = d3.axisLeft(yScale)
+    const y_axis_left = d3.axisLeft(y_axis_range)
         .tickSize(-innerWidth)
         .tickPadding(10);
 
-    const yAxisG = g.append('g')
-        .call(yAxis)
-        .selectAll('.domain')
-        .remove();
+    // appending the main elements as a group
+    const g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    yAxisG.append('text')
-        .attr('class', 'axis-label')
-        .attr('y', -60)
-        .attr('x', -innerHeight / 2)
-        .attr('fill', 'black')
-        .attr('transform', `rotate(-90)`)
-        .attr('text-anchor', 'middle')
-        .text(yAxisLabel);
-
-    const xAxisG = g.append('g').call(xAxis)
+    // append y_axis to g
+    const y_axis_g = g.append('g')
+    .call(y_axis_left);
+    
+    // append x_axis to g
+    const x_axis_g = g.append('g')
+        .call(x_axis_bottom)
         .attr('transform', `translate(0,${innerHeight})`);
 
-    xAxisG.select('.domain').remove();
+    const line_creator = d3.line()
+        .x(d => x_axis_range(x_value(d)))
+        .y(d => y_axis_range(y_value(d)));
 
-    xAxisG.append('text')
-        .attr('class', 'axis-label')
-        .attr('y', 80)
-        .attr('x', innerWidth / 2)
-        .attr('fill', 'black')
-        .text(xAxisLabel);
+    const country_names = d3.group(data, d => d.countryName);
 
-    const lineGenerator = d3.line()
-        .x(d => xScale(xValue(d)))
-        .y(d => yScale(yValue(d)));
-
-    const nested = d3.group(data, d => d.city);
-
-    var domain = [];
-    nested.forEach(d => {
-        domain.push(d[0].city);
+    var domain_values = [];
+    country_names.forEach(d => {
+        domain_values.push(d[0].countryName);
     });
-    colorScale.domain(domain);
+    col_scale.domain(domain_values);
 
     g.selectAll('.line-path')
-        .data(nested)
+        .data(country_names)
         .enter()
         .append('path')
         .attr('class', 'line-path')
-        .attr('d', d => lineGenerator(d[1]))
-        .attr('stroke', d => colorScale(d[0]));
-
-    svg.append('text')
-        .attr('class', 'title')
-        .attr('x', width / 2)
-        .attr('y', 45)
-        .text(titleText);
+        .attr('d', d => line_creator(d[1]))
+        .attr('stroke', d => col_scale(d[0]));
 });
 
-const make_our_data = function () {
+const make_our_data = function (original_data) {
     var new_data = [];
-    d3.csv('our_data.csv').then(data => {
-        data.forEach(d => {
-            for (var i = 1960; i < 2021; i++) {
-                var countryName = d["Country Name"];
-                var year = i;
-                var value = d[i];
-                var obj = {
-                    "countryName": countryName,
-                    "year": year,
-                    "value": value
-                }
-                new_data.push(obj);
+    original_data.forEach(d => {
+        for (var i = 1960; i < 2021; i++) {
+            var countryName = d["Country Name"];
+            var year = i;
+            var value = d[i];
+            var obj = {
+                "countryName": countryName,
+                "year": year,
+                "value": value
             }
-        });
+            new_data.push(obj);
+        }
     });
     return new_data;
+}
+
+function getXValue(d) {
+    return
 }
