@@ -1,6 +1,5 @@
 
-const titleText = 'Top 10 Most Populous Countries';
-const xAxisLabelText = 'Population';
+const titleText = 'Temperature in san fransisco';
 
 const svg = d3.select('svg');
 
@@ -12,43 +11,54 @@ const innerWidth = width - margin.left - margin.right;
 const innerHeight = height - margin.top - margin.bottom;
 
 
-d3.csv('data.csv').then(data => {
+d3.csv('temperature.csv').then(data => {
     data.forEach(d => {
-        d.population = +d.population * 1000;
+        d.temperature = +d.temperature;
+        d.timestamp = new Date(d.timestamp);
     });
 
-    // attaching the container to html page
-    const xValue = d => d['population'];
-    const yValue = d => d.country;
+    // taking x value and its label
+    const xValue = d => d.timestamp;
+    const xAxisLabel = 'Timestamp';
 
-    const xScale = d3.scaleLinear()
-        .domain([0, d3.max(data, xValue)])
+    // taking y value and its label
+    const yValue = d => d.temperature;
+    const yAxisLabel = 'Temperature';
+
+    const xScale = d3.scaleTime()
+        .domain(d3.extent(data, xValue))
         .range([0, innerWidth])
         .nice();
 
-    const yScale = d3.scalePoint()
-        .domain(data.map(yValue))
-        .range([0, innerHeight])
-        .padding(0.7);
+    const yScale = d3.scaleLinear()
+        .domain(d3.extent(data, yValue))
+        .range([innerHeight, 0])
+        .nice();
 
     const g = svg.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    const xAxisTickFormat = number =>
-        d3.format('.3s')(number)
-            .replace('G', 'B');
-
     const xAxis = d3.axisBottom(xScale)
-        .tickFormat(xAxisTickFormat)
-        .tickSize(-innerHeight);
+        .tickSize(-innerHeight)
+        .tickPadding(15);
 
     const yAxis = d3.axisLeft(yScale)
         .tickSize(-innerWidth)
+        .tickPadding(10);
 
-    g.append('g')
+    const yAxisG = g.append('g')
         .call(yAxis)
         .selectAll('.domain')
         .remove();
+
+    yAxisG.append('text')
+        .attr('class', 'axis-label')
+        .attr('y', -60)
+        .attr('x', -innerHeight / 2)
+        .attr('fill', 'black')
+        .attr('transform', `rotate(-90)`)
+        .attr('text-anchor', 'middle')
+        .text(yAxisLabel);
 
     const xAxisG = g.append('g').call(xAxis)
         .attr('transform', `translate(0,${innerHeight})`);
@@ -57,16 +67,18 @@ d3.csv('data.csv').then(data => {
 
     xAxisG.append('text')
         .attr('class', 'axis-label')
-        .attr('y', 65)
+        .attr('y', 80)
         .attr('x', innerWidth / 2)
         .attr('fill', 'black')
-        .text(xAxisLabelText);
+        .text(xAxisLabel);
 
-    g.selectAll('circle').data(data)
-        .enter().append('circle')
-        .attr('cy', d => yScale(yValue(d)))
-        .attr('cx', d => xScale(xValue(d)))
-        .attr('r', 15);
+    const lineGenerator = d3.line()
+        .x(d => xScale(xValue(d)))
+        .y(d => yScale(yValue(d)));
+
+    g.append('path')
+        .attr('class', 'line-path')
+        .attr('d', lineGenerator(data))
 
     g.append('text')
         .attr('class', 'title')
