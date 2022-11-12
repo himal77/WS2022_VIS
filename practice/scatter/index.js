@@ -11,6 +11,8 @@ const innerHeight = height - margin.top - margin.bottom;
 
 
 d3.csv('data-canvas.csv').then(data => {
+    make_our_data();
+
     data.forEach(d => {
         d.temperature = +d.temperature;
         d.timestamp = new Date(d.timestamp);
@@ -105,3 +107,23 @@ d3.csv('data-canvas.csv').then(data => {
         .attr('y', 45)
         .text(titleText);
 });
+
+const make_our_data = function () {
+    var new_data = [];
+    d3.csv('our_data.csv').then(data => {
+        data.forEach(d => {
+            for (var i = 1960; i < 2021; i++) {
+                var countryName = d["Country Name"];
+                var year = i;
+                var value = d[i];
+                var obj = {
+                    "countryName": countryName,
+                    "year": year,
+                    "value": value
+                }
+                new_data.push(obj);
+            }
+        });
+    });
+    return new_data;
+}
