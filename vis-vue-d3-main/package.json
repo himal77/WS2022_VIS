@@ -1,0 +1,30 @@
+{
+  "name": "vis-vue-d3",
+  "version": "1.2.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@usecsv/vuejs": "^1.1.16",
+    "bootstrap": "^4.5.3",
+    "bootstrap-vue": "^2.18.1",
+    "core-js": "^3.6.5",
+    "d3": "6.7.0",
+    "vue": "^2.6.12",
+    "vue-csv-loader": "^0.1.5",
+    "vuex": "^3.5.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.0",
+    "@vue/cli-service": "^4.5.0",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

@@ -3,16 +3,19 @@
     color: darkblue;
 }
 
-circle {
-	fill: royalblue;
-}
-
 .tick {
     font-size: 14px;
 }
 
 .axis-label {
-	font-size: 30px;
+	font-size: 2em;
 	fill: #29100d
 }
 
+.line-path{
+    fill: none;
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    mix-blend-mode: multiply;
+}
