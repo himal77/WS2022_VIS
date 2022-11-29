@@ -2,7 +2,6 @@
   <div class="vis-component" ref="chart">
     <div class="placeholder">
       <b>Here comes the scatterplot</b>.
-      where is my place
     </div>
     <svg class="main-svg" :width="svgWidth" :height="svgHeight">
     </svg>
